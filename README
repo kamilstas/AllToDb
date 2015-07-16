@@ -1,0 +1,113 @@
+#########################################
+BIG LOG FILES WRITE/READ TO/FROM MYSQL DB
+#########################################
+Author		Kamil Stas (kamil.stas@gmail.com)
+		Created and tested on Debian 7/8, MySQL 5.5/5.6
+		
+#########################################
+        	PREREQUISITIES
+#########################################
+- g++ compiler
+- libboost-dev
+- MySQL up and running or use simple apt-get to obtain default debian mysql installation:
+
+apt-get install libmysqlclient-dev mysql-client mysql-server php5-mysql libmysqld-dev libboost-dev
+
+- to avoid ERROR 2006 (HY000) MySQL server has gone away
+set mysql conf file ( my.cnf ) for slightly bigger value as your file in Mb
+
+Example:
+max_allowed_packet      = 6000M
+- then restart your mysql running service ( service mysql restart )
+
+#########################################		
+		Licensing
+#########################################
+Free to use
+
+#########################################
+		Compilation
+#########################################
+make clean
+make CPPFLAGS="-m64" CXXFLAGS="-m64" CFLAGS="-m64" LDFLAGS="-m64"
+#########################################
+		Help 
+#########################################
+# bin/main -h
+Usage:   bin/main [-option] [argument]
+option:  -h  show help information
+         -u  MySQL username
+         -p  MySQL password
+         -H  DB Host
+         -d  Database name which binary will create to store your log
+	 -r  Recover log from DB
+	  Recovery Log Filter Parameters:
+	  	  -D enter day in number ( 1-31 )
+	  	  -M enter month as 3 chars ( Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec )
+	  	  -Y enter year as 4 digits ( example: 2014, 2015 )
+		  -C enter http code ( example: 200, 404 )
+		  -R enter request method ( POST, GET )
+         -v  show version infomation
+         -l  enter logfile in absolute path
+example: bin/main -u user -d databasename -p pass -H localhost -l /tmp/access.log
+example: bin/main -r -u username -d databasename -p pass -H localhost -D 15 -M Sep -Y 2014 -C 200 -R GET
+
+
+#########################################
+		Examples
+#########################################
+#bin/main -H localhost -d xx -u root -p q -l /root/Desktop/log/access.log 
+/root/Desktop/log/access.logdbuser: root
+dbpass: q
+dbhost: localhost
+dbname: xx
+logfile: /media/Storage/log/access.log
+200000 inserts created in bulk
+....
+20000000 inserts created in bulk
+Inserting to DB
+Bulk file successfully deleted at the end
+
+
+# bin/main -r -u root -H localhost -p q -Y 2014 -R OPTIONS -d xx
+Creating reverse log from DB
+dbuser: root
+dbpass: q
+dbhost: localhost
+dbname: xx
+day: 
+month: 
+year: 2014
+http code: 
+request method: OPTIONS
+Check your recovered log file /tmp/access.log.recovered
+
+
+# bin/main -r -u root -H localhost -p q -Y 2014 -D 13 -C 404 -R GET -d xx
+Creating reverse log from DB
+dbuser: root
+dbpass: q
+dbhost: localhost
+dbname: xx
+day: 13
+month: 
+year: 2014
+http code: 404
+request method: GET
+Check your recovered log file /tmp/access.log.recovered
+
+
+# bin/main -r -u root -H localhost -p q -Y 2014 -D 15 -M Jan -C 200 -R POST -d xx
+Creating reverse log from DB
+dbuser: root
+dbpass: q
+dbhost: localhost
+dbname: xx
+day: 15
+month: Jan
+year: 2014
+http code: 200
+request method: POST
+Check your recovered log file /tmp/access.log.recovered
+
+#
